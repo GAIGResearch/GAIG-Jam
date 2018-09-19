@@ -3,6 +3,7 @@
 17-19 Sep 2018
 
 Theme: Competitions
+
 Projects:
 - Create uRTS bots in Java (x4)
 - Create uRTS evaluation function for MCTS (x1)
