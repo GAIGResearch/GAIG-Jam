@@ -56,7 +56,7 @@ public class BestHarvest extends AbstractAction {
 
     public void toxml(XMLWriter w)
     {
-        w.tagWithAttributes("Harvest","unitID=\""+unit.getID()+"\" target=\""+target.getID()
+        w.tagWithAttributes("Harvest","unitID=\""+getUnit().getID()+"\" target=\""+target.getID()
                 +"\" base=\""+base.getID()+"\" pathfinding=\""+pf.getClass().getSimpleName()+"\"");
         w.tag("/Harvest");
     }
@@ -66,14 +66,14 @@ public class BestHarvest extends AbstractAction {
      * to closest base and drop resource off.
      */
     public UnitAction execute(GameState gs, ResourceUsage ru) {
-        if (unit.getResources()==0) {
+        if (getUnit().getResources()==0) {
             // go get resources:
 //            System.out.println("findPathToAdjacentPosition from Harvest: (" + target.getX() + "," +
 //                               target.getY() + ")");
-            UnitAction move = pf.findPathToAdjacentPosition(unit, target.getX()+target.getY()
+            UnitAction move = pf.findPathToAdjacentPosition(getUnit(), target.getX()+target.getY()
                     * gs.getPhysicalGameState().getWidth(), gs, ru);
             if (move!=null) {
-                if (gs.isUnitActionAllowed(unit, move)) return move;
+                if (gs.isUnitActionAllowed(getUnit(), move)) return move;
                 else {
                     // Execute random move action
                     List<Integer> choices = new ArrayList<>();
@@ -85,7 +85,7 @@ public class BestHarvest extends AbstractAction {
                     while (choices.size() > 0) {
                         int choice = r.nextInt(choices.size());
                         move = new UnitAction(UnitAction.TYPE_MOVE, choice);
-                        if (gs.isUnitActionAllowed(unit, move)) return move;
+                        if (gs.isUnitActionAllowed(getUnit(), move)) return move;
                         choices.remove(choice);
                     }
                 }
@@ -93,23 +93,23 @@ public class BestHarvest extends AbstractAction {
             }
 
             // harvest:
-            if (target.getX() == unit.getX() &&
-                target.getY() == unit.getY()-1) return new UnitAction(UnitAction.TYPE_HARVEST,UnitAction.DIRECTION_UP);
-            if (target.getX() == unit.getX()+1 &&
-                target.getY() == unit.getY()) return new UnitAction(UnitAction.TYPE_HARVEST,UnitAction.DIRECTION_RIGHT);
-            if (target.getX() == unit.getX() &&
-                target.getY() == unit.getY()+1) return new UnitAction(UnitAction.TYPE_HARVEST,UnitAction.DIRECTION_DOWN);
-            if (target.getX() == unit.getX()-1 &&
-                target.getY() == unit.getY()) return new UnitAction(UnitAction.TYPE_HARVEST,UnitAction.DIRECTION_LEFT);
+            if (target.getX() == getUnit().getX() &&
+                target.getY() == getUnit().getY()-1) return new UnitAction(UnitAction.TYPE_HARVEST,UnitAction.DIRECTION_UP);
+            if (target.getX() == getUnit().getX()+1 &&
+                target.getY() == getUnit().getY()) return new UnitAction(UnitAction.TYPE_HARVEST,UnitAction.DIRECTION_RIGHT);
+            if (target.getX() == getUnit().getX() &&
+                target.getY() == getUnit().getY()+1) return new UnitAction(UnitAction.TYPE_HARVEST,UnitAction.DIRECTION_DOWN);
+            if (target.getX() == getUnit().getX()-1 &&
+                target.getY() == getUnit().getY()) return new UnitAction(UnitAction.TYPE_HARVEST,UnitAction.DIRECTION_LEFT);
         } else {
             // return resources:
 //            System.out.println("findPathToAdjacentPosition from Return: (" + target.getX() + ","
 //                               + target.getY() + ")");
             if (base != null) {
-                UnitAction move = pf.findPathToAdjacentPosition(unit, base.getX() + base.getY()
+                UnitAction move = pf.findPathToAdjacentPosition(getUnit(), base.getX() + base.getY()
                         * gs.getPhysicalGameState().getWidth(), gs, ru);
                 if (move != null) {
-                    if (gs.isUnitActionAllowed(unit, move)) return move;
+                    if (gs.isUnitActionAllowed(getUnit(), move)) return move;
                     else {
                         // Execute random move action
                         List<Integer> choices = new ArrayList<>();
@@ -121,7 +121,7 @@ public class BestHarvest extends AbstractAction {
                         while (choices.size() > 0) {
                             int choice = r.nextInt(choices.size());
                             move = new UnitAction(UnitAction.TYPE_MOVE, choice);
-                            if (gs.isUnitActionAllowed(unit, move)) return move;
+                            if (gs.isUnitActionAllowed(getUnit(), move)) return move;
                             choices.remove(choice);
                         }
                     }
@@ -129,14 +129,14 @@ public class BestHarvest extends AbstractAction {
                 }
 
             // harvest:
-            if (base.getX() == unit.getX() &&
-                base.getY() == unit.getY()-1) return new UnitAction(UnitAction.TYPE_RETURN,UnitAction.DIRECTION_UP);
-            if (base.getX() == unit.getX()+1 &&
-                base.getY() == unit.getY()) return new UnitAction(UnitAction.TYPE_RETURN,UnitAction.DIRECTION_RIGHT);
-            if (base.getX() == unit.getX() &&
-                base.getY() == unit.getY()+1) return new UnitAction(UnitAction.TYPE_RETURN,UnitAction.DIRECTION_DOWN);
-            if (base.getX() == unit.getX()-1 &&
-                base.getY() == unit.getY()) return new UnitAction(UnitAction.TYPE_RETURN,UnitAction.DIRECTION_LEFT);
+            if (base.getX() == getUnit().getX() &&
+                base.getY() == getUnit().getY()-1) return new UnitAction(UnitAction.TYPE_RETURN,UnitAction.DIRECTION_UP);
+            if (base.getX() == getUnit().getX()+1 &&
+                base.getY() == getUnit().getY()) return new UnitAction(UnitAction.TYPE_RETURN,UnitAction.DIRECTION_RIGHT);
+            if (base.getX() == getUnit().getX() &&
+                base.getY() == getUnit().getY()+1) return new UnitAction(UnitAction.TYPE_RETURN,UnitAction.DIRECTION_DOWN);
+            if (base.getX() == getUnit().getX()-1 &&
+                base.getY() == getUnit().getY()) return new UnitAction(UnitAction.TYPE_RETURN,UnitAction.DIRECTION_LEFT);
             }
         }
         return null;

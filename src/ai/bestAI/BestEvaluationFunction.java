@@ -20,6 +20,8 @@ public class BestEvaluationFunction extends EvaluationFunction {
     public static float DISTANCE_TO_RESOURCE = 10;
     public static float DISTANCE_TO_BASE = 5;
     public static float DISTANCE_TO_ENEMY = -25;
+    public static float BARRACKS_POINTS = -50;
+    public static float BASE_POINTS = -50;
 
     
     public float evaluate(int maxplayer, int minplayer, GameState gs) {
@@ -35,6 +37,9 @@ public class BestEvaluationFunction extends EvaluationFunction {
 
         // Give points for having resources available.
         float score = gs.getPlayer(player).getResources() * RESOURCE;
+
+        int no_bases = 0;
+        int no_barracks = 0;
 
         for(Unit u : pgs.getUnits()) {
             if (u.getPlayer() == player) {
@@ -88,6 +93,20 @@ public class BestEvaluationFunction extends EvaluationFunction {
 
                     score += closestDistance * DISTANCE_TO_BASE;
                     score += closestDistanceE * DISTANCE_TO_ENEMY;
+                }
+
+                // Give points for the number of bases and number of barracks over 1
+                if (u.getType().name.equals("Barracks")) {
+                    no_barracks ++;
+                    if (no_barracks > 1) {
+                        score += BARRACKS_POINTS;
+                    }
+                }
+                if (u.getType().name.equals("Base")) {
+                    no_barracks ++;
+                    if (no_barracks > 1) {
+                        score += BASE_POINTS;
+                    }
                 }
             }
         }

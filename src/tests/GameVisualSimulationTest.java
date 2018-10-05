@@ -4,6 +4,7 @@
  */
 package tests;
 
+import ai.bestAI.BestAI;
 import ai.core.AI;
 import ai.*;
 import ai.abstraction.WorkerRush;
@@ -31,11 +32,13 @@ public class GameVisualSimulationTest {
 
         GameState gs = new GameState(pgs, utt);
         int MAXCYCLES = 5000;
-        int PERIOD = 20;
+        int PERIOD = 100;
         boolean gameover = false;
         
-        AI ai1 = new WorkerRush(utt, new BFSPathFinding());        
-        AI ai2 = new RandomBiasedAI();
+        AI ai1 = new BestAI(utt, new BFSPathFinding());
+//        AI ai2 = new RandomBiasedAI();
+        AI ai2 = new WorkerRush(utt, new BFSPathFinding());
+
 
         JFrame w = PhysicalGameStatePanel.newVisualizer(gs,640,640,false,PhysicalGameStatePanel.COLORSCHEME_BLACK);
 //        JFrame w = PhysicalGameStatePanel.newVisualizer(gs,640,640,false,PhysicalGameStatePanel.COLORSCHEME_WHITE);

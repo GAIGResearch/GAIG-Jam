@@ -10,6 +10,7 @@ import rts.*;
 import rts.units.Unit;
 import rts.units.UnitType;
 import rts.units.UnitTypeTable;
+import util.Pair;
 
 import java.util.*;
 
@@ -30,6 +31,8 @@ public class BestAI extends AI {
     private ArrayList<Unit> fighterList;
     private List<Integer> reservedPositions;
 
+    private ArrayList<Pair<Integer, Integer>> available;
+
     private EvaluationFunction evaluator;
     private UnitType workerType, lightType, heavyType, rangedType, baseType, barracksType;
     private PathFinding a_pf;
@@ -37,7 +40,7 @@ public class BestAI extends AI {
     private int harvesters = 0;
 
     private boolean done;
-    private int simulations = 5;
+    private int simulations = 200;
     private int MIN_RESOURCE_WAIT_BASE = 5;
     private int MIN_WORKERS_WAIT_BASE = 5;
     private int MIN_TICK_WAIT_BASE = 500;
@@ -200,7 +203,7 @@ public class BestAI extends AI {
             model = gs.clone();
             model.issue(indToPlayerAction(individual1, gs));
             for (int i = 0; i < simulations && !model.gameover(); i++) {
-                model.issue(new PlayerAction());
+                model.cycle();
             }
             double value1 = evaluator.evaluate(player, 1 - player, model);
 
@@ -394,6 +397,9 @@ public class BestAI extends AI {
                     buildBuilding(pa, player, gs, u, l, baseList, baseType, reservedPositions, a_pf);
                     buildBuilding(pa, player, gs, u, l, barrackList, barracksType, reservedPositions, a_pf);
 
+                    // - move to random location
+                    moveToRandomPos(u, l, pgs);
+
                     listOfActions.put(idx,l);
                     countOfActions.put(idx,l.size());
                     idx ++;
@@ -403,6 +409,33 @@ public class BestAI extends AI {
         return idx;
     }
 
+    /**
+     * Method to transform the free positions in the grid to lists of X and Y positions
+     * @param allFree - free positions
+     */
+    private void freeToAvailable(boolean[][] allFree) {
+        available = new ArrayList<>();
+        for (int x = 0; x < allFree.length; x++) {
+            for (int y = 0; y < allFree[x].length; y++) {
+                if (allFree[x][y]) {
+                    available.add(new Pair<>(x, y));
+                }
+            }
+        }
+    }
+
+    /**
+     * Method to choose to move to random available position on the map
+     * @param u - unit
+     * @param l - list of actions
+     * @param pgs - physical game state object
+     */
+    private void moveToRandomPos(Unit u, List<AbstractAction> l, PhysicalGameState pgs) {
+        boolean[][] allFree = pgs.getAllFree();
+        freeToAvailable(allFree);
+        Pair<Integer, Integer> choice = available.get(gen.nextInt(available.size()));
+        l.add(new Move(u, choice.m_a, choice.m_b, a_pf));
+    }
     /**
      * Method to add base actions. It will keep spawning workers unless no barrack was built late into the game,
      * in which case it will wait for resources instead.
@@ -516,7 +549,10 @@ public class BestAI extends AI {
                     if (closestEnemy != null) {
                         l.add(new Attack(u,closestEnemy,a_pf));
                     }
-                    // TODO: explore the map
+                    // TODO: explore the map more smartly
+                    // - move to random location
+                    moveToRandomPos(u, l, pgs);
+
                     listOfActions.put(idx,l);
                     countOfActions.put(idx,l.size());
                     idx ++;
@@ -528,7 +564,7 @@ public class BestAI extends AI {
 
     /**
      *
-     private int simulations = 5;
+     private int simulations = 50;
      private int MIN_RESOURCE_WAIT_BASE = 5;
      private int MIN_WORKERS_WAIT_BASE = 5;
      private int MIN_TICK_WAIT_BASE = 500;
@@ -540,7 +576,7 @@ public class BestAI extends AI {
     @Override
     public List<ParameterSpecification> getParameters() {
         List<ParameterSpecification> params = new ArrayList<>();
-        params.add(new ParameterSpecification("Simulations", int.class, 5));
+        params.add(new ParameterSpecification("Simulations", int.class, 50));
         params.add(new ParameterSpecification("ResourcesWaitBase", int.class, 5));
         params.add(new ParameterSpecification("WorkersWaitBase", int.class, 5));
         params.add(new ParameterSpecification("TickWaitBase", int.class, 500));
