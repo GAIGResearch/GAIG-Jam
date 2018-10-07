@@ -115,15 +115,27 @@ public class Unit implements Serializable {
      * @param other
      */
     public Unit(Unit other) {
+        setState(other);
+    }
+
+    public void setState(Unit other) {
         player = other.player;
         type = other.type;
         x = other.x;
         y = other.y;
         resources = other.resources;
         hitpoints = other.hitpoints;
-        ID = other.ID;        
+        ID = other.ID;
     }
-            
+
+    public boolean checkState(Unit other) {
+        return type == other.type && x == other.x && y == other.y && resources == other.resources && hitpoints == other.hitpoints;
+    }
+
+    public boolean checkEquals(Unit other) {
+        return player == other.player && type == other.type && x == other.x && y == other.y && resources == other.resources && hitpoints == other.hitpoints && ID == other.ID;
+    }
+
     /**
      * Returns the owner ID
      * @return

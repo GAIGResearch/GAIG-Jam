@@ -17,6 +17,7 @@ import javax.swing.JFrame;
 import rts.GameState;
 import rts.PhysicalGameState;
 import rts.PlayerAction;
+import rts.units.Unit;
 import rts.units.UnitTypeTable;
 import util.XMLWriter;
 
@@ -46,8 +47,27 @@ public class GameVisualSimulationTest {
         long nextTimeToUpdate = System.currentTimeMillis() + PERIOD;
         do{
             if (System.currentTimeMillis()>=nextTimeToUpdate) {
+                GameState clone = gs.clone();
                 PlayerAction pa1 = ai1.getAction(0, gs);
+
+                for (Unit u: gs.getUnits()) {
+                    Unit correctUnitState = clone.getUnit(u.getID());
+                    if (!u.checkEquals(correctUnitState)) {
+                        System.out.println("Player 0 trying to cheat!");
+                        u.setState(correctUnitState);
+                    }
+                }
+
                 PlayerAction pa2 = ai2.getAction(1, gs);
+
+                for (Unit u: gs.getUnits()) {
+                    Unit correctUnitState = clone.getUnit(u.getID());
+                    if (!u.checkEquals(correctUnitState)) {
+                        System.out.println("Player 1 trying to cheat!");
+                        u.setState(correctUnitState);
+                    }
+                }
+
                 gs.issueSafe(pa1);
                 gs.issueSafe(pa2);
 
@@ -67,5 +87,5 @@ public class GameVisualSimulationTest {
         ai2.gameOver(gs.winner());
         
         System.out.println("Game Over");
-    }    
+    }
 }

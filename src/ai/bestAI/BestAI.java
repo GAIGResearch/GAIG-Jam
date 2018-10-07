@@ -184,9 +184,9 @@ public class BestAI extends AI {
         // Evaluate individual. Issue the actions contained to a copy of the game, then simulate a number of game cycles
         // Evaluate the resultant game state.
         GameState model = gs.clone();
-        model.issue(indToPlayerAction(individual, gs));
+        model.issue(indToPlayerAction(individual, model));
         for (int i = 0; i < simulations && !model.gameover(); i++) {
-            model.issue(new PlayerAction());
+            model.cycle();
         }
         double value = evaluator.evaluate(player,1-player, model);
 
@@ -201,7 +201,7 @@ public class BestAI extends AI {
 
             // Evaluate new individual. Same process as before.
             model = gs.clone();
-            model.issue(indToPlayerAction(individual1, gs));
+            model.issue(indToPlayerAction(individual1, model));
             for (int i = 0; i < simulations && !model.gameover(); i++) {
                 model.cycle();
             }
@@ -307,13 +307,23 @@ public class BestAI extends AI {
             if (individual[i] != -1) {
                 UnitAction ua = listOfActions.get(i).get(individual[i]).execute(gs);
                 if (ua != null) {
-                    addAction(pa, listOfUnits.get(i), ua, gs, gs.getPhysicalGameState());
+                    addAction(pa, mapUnitToClone(listOfUnits.get(i), gs), ua, gs, gs.getPhysicalGameState());
                 }
             } else {
                 break;
             }
         }
         return pa;
+    }
+
+    /**
+     * Method to find the right Unit object in cloned game state
+     * @param u original unit
+     * @param clone cloned game state
+     * @return cloned unit (has same ID)
+     */
+    private Unit mapUnitToClone(Unit u, GameState clone) {
+        return clone.getUnit(u.getID());
     }
 
     /**
