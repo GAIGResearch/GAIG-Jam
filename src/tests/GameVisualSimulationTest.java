@@ -21,7 +21,9 @@ import rts.units.Unit;
 import rts.units.UnitTypeTable;
 import util.XMLWriter;
 
-/**
+import static tournaments.RoundRobinTournament.checkCheating;
+
+ /**
  *
  * @author santi
  */
@@ -48,25 +50,12 @@ public class GameVisualSimulationTest {
         do{
             if (System.currentTimeMillis()>=nextTimeToUpdate) {
                 GameState clone = gs.clone();
-                PlayerAction pa1 = ai1.getAction(0, gs);
 
-                for (Unit u: gs.getUnits()) {
-                    Unit correctUnitState = clone.getUnit(u.getID());
-                    if (!u.checkEquals(correctUnitState)) {
-                        System.out.println("Player 0 trying to cheat!");
-                        u.setState(correctUnitState);
-                    }
-                }
+                PlayerAction pa1 = ai1.getAction(0, gs);
+                checkCheating(gs, clone, 0);
 
                 PlayerAction pa2 = ai2.getAction(1, gs);
-
-                for (Unit u: gs.getUnits()) {
-                    Unit correctUnitState = clone.getUnit(u.getID());
-                    if (!u.checkEquals(correctUnitState)) {
-                        System.out.println("Player 1 trying to cheat!");
-                        u.setState(correctUnitState);
-                    }
-                }
+                checkCheating(gs, clone, 1);
 
                 gs.issueSafe(pa1);
                 gs.issueSafe(pa2);
