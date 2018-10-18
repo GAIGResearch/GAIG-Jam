@@ -236,7 +236,7 @@ public class InformedNaiveMCTS extends AIWithComputationBudget implements Interr
             epsilon_g*=discount_g;
             total_runs++;
             
-//            System.out.println(total_runs + " - " + epsilon_0 + ", " + epsilon_l + ", " + epsilon_g);
+//            System.out.println(totalRuns + " - " + epsilon_0 + ", " + epsilon_l + ", " + epsilon_g);
             
         } else {
             // no actions to choose from :)

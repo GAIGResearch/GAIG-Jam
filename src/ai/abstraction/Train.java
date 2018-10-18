@@ -88,12 +88,10 @@ public class Train extends AbstractAction {
         
 //        System.out.println("Executing train: " + type + " best direction " + best_direction);
 
-
         if (best_direction!=-1) {
             UnitAction ua = new UnitAction(UnitAction.TYPE_PRODUCE,best_direction, type);
             if (gs.isUnitActionAllowed(unit, ua)) return ua;
         }
-        
         return null;
     }
     
@@ -126,6 +124,11 @@ public class Train extends AbstractAction {
         }
 
         return -distance;
+    }
+
+    @Override
+    public String toString() {
+        return "{Train," + unit + "," + type + "}";
     }
     
 }

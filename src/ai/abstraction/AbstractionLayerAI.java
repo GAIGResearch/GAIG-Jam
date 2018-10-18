@@ -61,7 +61,7 @@ public abstract class AbstractionLayerAI extends AIWithComputationBudget {
         List<Pair<Unit, UnitAction>> desires = new ArrayList<>();
 
         lastGameState = gs;
-        
+
         // Execute abstract actions:
         List<Unit> toDelete = new ArrayList<>();
         ResourceUsage ru = new ResourceUsage();

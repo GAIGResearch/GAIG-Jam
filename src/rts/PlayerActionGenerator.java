@@ -12,20 +12,23 @@ import util.Pair;
  * @author santi
  */
 public class PlayerActionGenerator {
-    private Random r;
-    private int playerID;
+    static Random r = new Random();
     
-    private GameState gameState;
-    private PhysicalGameState physicalGameState;
-    private ResourceUsage base_ru;
-    private List<Pair<Unit,List<UnitAction>>> choices;
-    private PlayerAction lastAction;
-    private long size;  // this will be capped at Long.MAX_VALUE;
-    private long generated;
-    private int choiceSizes[];
-    private int currentChoice[];
-    private boolean moreActions;
-
+    GameState gameState;
+    PhysicalGameState physicalGameState;
+    ResourceUsage base_ru;
+    List<Pair<Unit,List<UnitAction>>> choices;
+    PlayerAction lastAction = null;
+    long size = 1;  // this will be capped at Long.MAX_VALUE;
+    long generated = 0;
+    int choiceSizes[] = null;
+    int currentChoice[] = null;
+    boolean moreActions = true;
+    
+    /**
+     * 
+     * @return
+     */
     public long getGenerated() {
         return generated;
     }
@@ -45,18 +48,11 @@ public class PlayerActionGenerator {
 
     /**
      * Generating all possible actions for a player in a given state
-     * @param a_gs Game State
-     * @param pID Player ID
-     * @throws Exception If no units can execute actions
+     * @param a_gs
+     * @param pID
+     * @throws Exception
      */
     public PlayerActionGenerator(GameState a_gs, int pID) throws Exception {
-		moreActions = true;
-		size = 1;
-		generated = 0;
-		lastAction = null;
-		r = new Random();
-        playerID = pID;
-
         // Generate the reserved resources:
         base_ru = new ResourceUsage();
         gameState = a_gs;
@@ -70,70 +66,33 @@ public class PlayerActionGenerator {
 			}
 		}
         
-        updateChoices(a_gs, -1, pID);
-    }
-
-    private PlayerActionGenerator(GameState a_gs, int pID, boolean moreActions, long size, long generated, PlayerAction lastAction, Random r) throws Exception {
-        this.moreActions = moreActions;
-        this.size = size;
-        this.generated = generated;
-        this.r = r;
-        playerID = pID;
-
-        this.lastAction = new PlayerAction();
-        this.lastAction.r.merge(lastAction.r);
-        for (Pair<Unit, UnitAction> p : lastAction.actions) {
-            this.lastAction.addUnitAction(a_gs.getUnit(p.m_a.getID()), p.m_b);
-        }
-
-        // Generate the reserved resources:
-        base_ru = new ResourceUsage();
-        gameState = a_gs;
-        physicalGameState = gameState.getPhysicalGameState();
-
-        for (Unit u : physicalGameState.getUnits()) {
-            UnitActionAssignment uaa = gameState.unitActions.get(u);
-            if (uaa != null) {
-                ResourceUsage ru = uaa.action.resourceUsage(u, physicalGameState);
-                base_ru.merge(ru);
-            }
-        }
-
-        updateChoices(a_gs, -1, pID);
-    }
-
-    public PlayerActionGenerator getClone(GameState a_gs) throws Exception {
-        return new PlayerActionGenerator(a_gs, playerID, moreActions, size, generated, lastAction, r);
-    }
-
-    private void updateChoices(GameState a_gs, int idx, int pID) throws Exception {
-        this.moreActions = true;
-
         choices = new ArrayList<>();
-        for (Unit u : physicalGameState.getUnits()) {
-            if (u.getPlayer() == pID) {
-                if (gameState.unitActions.get(u) == null) {
-                    List<UnitAction> l = u.getUnitActions(gameState);
-                    choices.add(new Pair<>(u, l));
-                    // make sure we don't overflow:
-                    long tmp = l.size();
-                    if (Long.MAX_VALUE / size <= tmp) {
-                        size = Long.MAX_VALUE;
-                    } else {
-                        size *= (long) l.size();
-                    }
-                }
-            }
-        }
+		for (Unit u : physicalGameState.getUnits()) {
+			if (u.getPlayer() == pID) {
+				if (gameState.unitActions.get(u) == null) {
+					List<UnitAction> l = u.getUnitActions(gameState);
+					choices.add(new Pair<>(u, l));
+					// make sure we don't overflow:
+					long tmp = l.size();
+					if (Long.MAX_VALUE / size <= tmp) {
+						size = Long.MAX_VALUE;
+					} else {
+						size *= (long) l.size();
+					}
+					// System.out.println("size = " + size);
+				}
+			}
+		}
+		// System.out.println("---");
 
-        if (choices.size() == 0) {
-            System.err.println("Problematic game state:");
-            System.err.println(a_gs);
-            throw new Exception(
-                    "Move generator for player " + pID + " created with no units that can execute actions! (status: "
-                            + a_gs.canExecuteAnyAction(0) + ", " + a_gs.canExecuteAnyAction(1) + ")"
-            );
-        }
+		if (choices.size() == 0) {
+			System.err.println("Problematic game state:");
+			System.err.println(a_gs);
+			throw new Exception(
+				"Move generator for player " + pID + " created with no units that can execute actions! (status: "
+						+ a_gs.canExecuteAnyAction(0) + ", " + a_gs.canExecuteAnyAction(1) + ")"
+			);
+		}
 
         choiceSizes = new int[choices.size()];
         currentChoice = new int[choices.size()];
@@ -143,14 +102,15 @@ public class PlayerActionGenerator {
             currentChoice[i] = 0;
             i++;
         }
-    }
+    } 
     
     /**
      * Shuffles the list of choices
      */
     public void randomizeOrder() {
 		for (Pair<Unit, List<UnitAction>> choice : choices) {
-			List<UnitAction> tmp = new LinkedList<>(choice.m_b);
+			List<UnitAction> tmp = new LinkedList<>();
+			tmp.addAll(choice.m_b);
 			choice.m_b.clear();
 			while (!tmp.isEmpty())
 				choice.m_b.add(tmp.remove(r.nextInt(tmp.size())));
@@ -159,10 +119,10 @@ public class PlayerActionGenerator {
     
     /**
      * Increases the index that tracks the next action to be returned
-     * by {@link #getNextAction(GameState, long)}
-     * @param startPosition starting position for iterator
+     * by {@link #getNextAction(long)}
+     * @param startPosition
      */
-	private void incrementCurrentChoice(int startPosition) {
+    public void incrementCurrentChoice(int startPosition) {
 		for (int i = 0; i < startPosition; i++)
 			currentChoice[i] = 0;
 		
@@ -177,11 +137,12 @@ public class PlayerActionGenerator {
     }
 
     /**
+     * Returns the next PlayerAction for the state stored in this object
      * @param cutOffTime time to stop generationg the action
-     * @return the next PlayerAction for the state stored in this object
-     * @throws Exception If no units can execute actions
+     * @return
+     * @throws Exception
      */
-    public PlayerAction getNextAction(GameState gs, int idx, long cutOffTime) throws Exception {
+    public PlayerAction getNextAction(long cutOffTime) throws Exception {
         int count = 0;
         while(moreActions) {
             boolean consistent = true;
@@ -198,9 +159,9 @@ public class PlayerActionGenerator {
 				Unit u = unitChoices.m_a;
 				UnitAction ua = unitChoices.m_b.get(choice);
 
-				ResourceUsage r2 = ua.resourceUsage(u, gs.getPhysicalGameState());
+				ResourceUsage r2 = ua.resourceUsage(u, physicalGameState);
 
-				if (pa.getResourceUsage().consistentWith(r2, gs)) {
+				if (pa.getResourceUsage().consistentWith(r2, gameState)) {
 					pa.getResourceUsage().merge(r2);
 					pa.addUnitAction(u, ua);
 				} else {
@@ -222,24 +183,22 @@ public class PlayerActionGenerator {
 				return null;
 			}
 			count++;
-
-			if (! moreActions) {
-			    updateChoices(gs, idx, playerID);
-            }
         }
         lastAction = null;
         return null;
     }
     
     /**
-     * @return a random player action for the game state in this object
+     * Returns a random player action for the game state in this object
+     * @return
      */
     public PlayerAction getRandom() {
 		Random r = new Random();
 		PlayerAction pa = new PlayerAction();
 		pa.setResourceUsage(base_ru.clone());
 		for (Pair<Unit, List<UnitAction>> unitChoices : choices) {
-			List<UnitAction> l = new LinkedList<>(unitChoices.m_b);
+			List<UnitAction> l = new LinkedList<UnitAction>();
+			l.addAll(unitChoices.m_b);
 			Unit u = unitChoices.m_a;
 
 			boolean consistent = false;
@@ -258,8 +217,9 @@ public class PlayerActionGenerator {
     }
     
     /**
-     * @param a PlayerAction object containing actions list
-     * @return the index of a given PlayerAction within the list of actions
+     * Finds the index of a given PlayerAction within the list of PlayerActions
+     * @param a
+     * @return
      */
 	public long getActionIndex(PlayerAction a) {
 		int choice[] = new int[choices.size()];
@@ -289,16 +249,16 @@ public class PlayerActionGenerator {
     
     
     public String toString() {
-        StringBuilder ret = new StringBuilder("PlayerActionGenerator:\n");
-        for(Pair<Unit,List<UnitAction>> choice : choices) {
-            ret.append("  (").append(choice.m_a).append(",").append(choice.m_b.size()).append(")\n");
+        String ret = "PlayerActionGenerator:\n";
+        for(Pair<Unit,List<UnitAction>> choice:choices) {
+            ret = ret + "  (" + choice.m_a + "," + choice.m_b.size() + ")\n";
         }
-        ret.append("currentChoice: ");
-		for (int aCurrentChoice : currentChoice) {
-			ret.append(aCurrentChoice).append(" ");
-		}
-        ret.append("\nactions generated so far: ").append(generated);
-        return ret.toString();
+        ret += "currentChoice: ";
+        for(int i = 0;i<currentChoice.length;i++) {
+            ret += currentChoice[i] + " ";
+        }
+        ret += "\nactions generated so far: " + generated;
+        return ret;
     }
     
 }

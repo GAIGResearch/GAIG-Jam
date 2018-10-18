@@ -95,4 +95,6 @@ public abstract class AbstractAction {
     
     
     public abstract UnitAction execute(GameState pgs, ResourceUsage ru);
+
+    public void reset() {}
 }

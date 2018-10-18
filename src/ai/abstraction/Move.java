@@ -60,4 +60,9 @@ public class Move extends AbstractAction {
         if (move!=null && gs.isUnitActionAllowed(unit, move)) return move;
         return null;
     }
+
+    @Override
+    public String toString() {
+        return "{Move," + unit + ",x:" + x + ",y:" + y + "}";
+    }
 }

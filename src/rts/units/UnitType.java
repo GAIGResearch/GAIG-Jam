@@ -378,5 +378,10 @@ public class UnitType {
         UnitType ut = new UnitType();
         ut.updateFromJSON(o, utt);
         return ut;
-    }    
+    }
+
+    @Override
+    public String toString() {
+        return "(" + name + ")";
+    }
 }

@@ -66,5 +66,10 @@ public class Attack extends AbstractAction  {
             if (move!=null && gs.isUnitActionAllowed(unit, move)) return move;
             return null;
         }        
-    }    
+    }
+
+    @Override
+    public String toString() {
+        return "{Attack," + unit + "," + target + "}";
+    }
 }

@@ -53,5 +53,10 @@ public class Idle extends AbstractAction  {
             }
         }
         return null;
-    }    
+    }
+
+    @Override
+    public String toString() {
+        return "{Idle," + unit + "}";
+    }
 }

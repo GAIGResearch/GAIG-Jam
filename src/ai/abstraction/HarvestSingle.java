@@ -16,19 +16,20 @@ import util.XMLWriter;
  *
  * @author santi
  */
-public class Harvest extends AbstractAction  {
+public class HarvestSingle extends AbstractAction  {
     Unit target;
     Unit base;
     PathFinding pf;
-    
-    public Harvest(Unit u, Unit a_target, Unit a_base, PathFinding a_pf) {
+    int stage;
+
+    public HarvestSingle(Unit u, Unit a_target, Unit a_base, PathFinding a_pf) {
         super(u);
         target = a_target;
         base = a_base;
         pf = a_pf;
+        stage = 0;
     }
-    
-    
+
     public Unit getTarget() {
         return target;
     }
@@ -40,15 +41,16 @@ public class Harvest extends AbstractAction  {
     
     
     public boolean completed(GameState gs) {
-        if (!gs.getPhysicalGameState().getUnits().contains(target)) return true;
+        //if (!gs.getPhysicalGameState().getUnits().contains(target)) return true;
+        if(stage > 1) return true;
         return false;
     }
     
     
     public boolean equals(Object o)
     {
-        if (!(o instanceof Harvest)) return false;
-        Harvest a = (Harvest)o;
+        if (!(o instanceof HarvestSingle)) return false;
+        HarvestSingle a = (HarvestSingle)o;
         if (target.getID() != a.target.getID()) return false;
         if (base.getID() != a.base.getID()) return false;
         if (pf.getClass() != a.pf.getClass()) return false;
@@ -66,6 +68,12 @@ public class Harvest extends AbstractAction  {
     public UnitAction execute(GameState gs, ResourceUsage ru) {
         PhysicalGameState pgs = gs.getPhysicalGameState();
         if (unit.getResources()==0) {
+
+            if(stage == 1)
+            {
+                stage = 2;
+            }
+
             // go get resources:
 //            System.out.println("findPathToAdjacentPosition from Harvest: (" + target.getX() + "," + target.getY() + ")");
             UnitAction move = pf.findPathToAdjacentPosition(unit, target.getX()+target.getY()*gs.getPhysicalGameState().getWidth(), gs, ru);
@@ -84,6 +92,7 @@ public class Harvest extends AbstractAction  {
             if (target.getX() == unit.getX()-1 &&
                 target.getY() == unit.getY()) return new UnitAction(UnitAction.TYPE_HARVEST,UnitAction.DIRECTION_LEFT);
         } else {
+            stage = 1;
             // return resources:
 //            System.out.println("findPathToAdjacentPosition from Return: (" + target.getX() + "," + target.getY() + ")");
             UnitAction move = pf.findPathToAdjacentPosition(unit, base.getX()+base.getY()*gs.getPhysicalGameState().getWidth(), gs, ru);
@@ -105,8 +114,9 @@ public class Harvest extends AbstractAction  {
         return null;
     }
 
+
     @Override
     public String toString() {
-        return "{Harvest," + unit + "," + target + "," + base +  "}";
+        return "{HarvestSingle," + unit + "," + target + "," + base +  "}";
     }
 }
