@@ -113,6 +113,7 @@ public class EvoMonteCarlo extends AIWithComputationBudget implements Interrupti
                 getBestActionSoFar();
             }
 
+
             //Translate abstract actions into unit actions for each unit.
             return moveGenerator.translateActions(player, gs);
 
@@ -253,10 +254,12 @@ public class EvoMonteCarlo extends AIWithComputationBudget implements Interrupti
         if (computeFromStats)
             computeBestActionFromStats();
 
+        PlayerAction bestPA = best.getPA(gsToStartFrom, moveGenerator.base_ru);
+
         //Assign the best abstract action
         moveGenerator.inform(best.abs);
 
-        return best.getPA(gsToStartFrom, moveGenerator.base_ru);
+        return bestPA;
     }
 
     private void computeBestActionFromStats() {

@@ -127,8 +127,13 @@ public class Train extends AbstractAction {
     }
 
     @Override
+    public void reset() {
+        completed = false;
+    }
+
+    @Override
     public String toString() {
-        return "{Train," + unit + "," + type + "}";
+        return "{Train," + unit + "," + type + ": complete? " + completed + "}";
     }
     
 }

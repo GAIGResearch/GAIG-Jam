@@ -33,7 +33,7 @@ public abstract class AbstractionLayerAI extends AIWithComputationBudget {
     //      - build(type,x,y)
     //      - harvest(target)
     //      - attack(target)
-    protected HashMap<Unit, AbstractAction> actions = new LinkedHashMap<>();
+    public HashMap<Unit, AbstractAction> actions = new LinkedHashMap<>();
     protected PathFinding pf = null;
     // In case the GameState is cloned, and the Unit pointers in the "actions" map change, this variable
     // saves a pointer to the previous GameState, if it's different than the current one, then we need to find a mapping
@@ -88,7 +88,6 @@ public abstract class AbstractionLayerAI extends AIWithComputationBudget {
                             }
                             ru.merge(ua.resourceUsage(aa.unit, pgs));
                         }
-
                     }
                 }
             }
